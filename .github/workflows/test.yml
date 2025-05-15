@@ -1,1 +1,31 @@
+name: Correcció Consultes SQL
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: practica
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping -h localhost -uroot -proot" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Wait for MySQL
+        run: sleep 20
+
+      - name: Install dependencies
+        run: pip install mysql-connector-python pytest
+
+      - name: Load schema and data
+        run: mysql -h 127.0.0.1 -u root -proot practica < schema.sql
+
+      - name: Run tests
+        run: pytest test_consultes.py
 
